@@ -176,7 +176,11 @@
                 },
             },
             created: function () {
-                fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/lessons/products").then(
+                fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/lessons/products",{
+                    method: 'GET',
+    //  mode: 'no-cors',
+      headers: {"Content-Type": "application/json", }
+                }).then(
                     function (response) {
                         response.json().then(function (json) {
                             app.lessons = json;

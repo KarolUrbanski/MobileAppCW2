@@ -6,10 +6,13 @@ var ObjectId = require('mongodb').ObjectID;
 const path = require("path");
 let propertiesPath = path.resolve(__dirname, "conf/db.properties");
 let properties = propertiesReader(propertiesPath);
+let cors = require("cors")
+
 
 //Create express app and configure it with body-parser
 const app = express();
 
+app.use(cors());
 //URL-Encoding of User and PWD
 //for potential special characters
 let dbPprefix = properties.get("db.prefix");
@@ -34,7 +37,6 @@ app.param("collectionName", function (req, res, next, collectionName) {
   req.collection = db.collection(collectionName);
   return next();
 });
-
 app.get("/lessons/:collectionName", (req, res) => {
   req.collection
     .find({}, { sort: [["price", -1]] })
@@ -42,10 +44,13 @@ app.get("/lessons/:collectionName", (req, res) => {
       if (err) {
         return next(err);
       }
+      res.set({
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+    });
       res.send(results);
     });
 });
-
 app.post("/collections/:collectionName", function (req, res, next) {
   // TODO: Validate req.body
   console.log(req.body);
@@ -75,11 +80,9 @@ app.put("/collections/:collectionName/:id", function (req, res, next) {
   );
 });
 
-async function lessons(request, response) {
-  response.json(data);
-}
 
 //Start the app listening on port 8080
+
 const port = process.env.PORT || 8080;
 app.listen(port, function() {
 console.log("App started on port: " + port);
