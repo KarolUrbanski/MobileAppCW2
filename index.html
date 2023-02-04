@@ -119,7 +119,7 @@
                         this.checkout.price=this.totalPrice;
                         this.checkout.number_of_space=this.order.count
                         console.log(this.checkout);
-                        fetch("http://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/collections/orders", {
+                        fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/collections/orders", {
                             method: "POST", //set the HTTP method as "POST"
                             headers: {
                                 "Content-Type": "application/json", //set the data type as JSON
@@ -147,7 +147,7 @@
                     }
                 },
                 updateSpaces: function (id) {
-                    fetch("http://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/collections/products/"+id, {
+                    fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/collections/products/"+id, {
                             method: "PUT", //set the HTTP method as "PUT"
                             headers: {
                                 "Content-Type": "application/json", //set the data type as JSON
@@ -176,7 +176,7 @@
                 },
             },
             created: function () {
-                fetch("http://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/lessons/products").then(
+                fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/lessons/products").then(
                     function (response) {
                         response.json().then(function (json) {
                             app.lessons = json;
