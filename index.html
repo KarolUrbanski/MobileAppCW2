@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CW1 - group work </title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <ul class="lesson-boxes">
+            <div v-for="lesson in lessons" class="lesson-box">
+                <li>topic: {{ lesson.topic }}</li>
+                <li>location: {{ lesson.location }}</li>
+                <li>price: {{ lesson.price }}</li>
+                <p v-if="lesson.space <= 0">No more spaces!</p>
+                <p v-else-if="lesson.space <= 5">Only {{lesson.space}} spaces!</p>
+                <p v-else=>Spaces: {{lesson.space}}</p>
+                <input class="basketbt" type="button" value="Add to Basket" v-on:click="toBasket(lesson)"
+                    v-if="lesson.space > 0" />
+                <input class="basketbt" type="button" value="Add to Basket" disabled="disabled" v-else />
+            </div>
+        </ul>
+
+        <div id="cart" v-show="order.count>0">
+            <h2> Shopping Cart <i class="fa-solid fa-cart-shopping"></i></h2>
+            <div class="left mini-cont">
+                <p>Items in cart: <b>{{order.count}}</b></p>
+                <p>Total Price: <b>{{totalPrice}}</b></p>
+            </div>
+            <div class="itemsCont">
+                <div v-for="item in order.subjecs" class="cont-mini">
+                    <h3>{{item.name}} </h3>
+                    <p>{{item.location}}</p>
+                    <p>Price: {{item.price}}</p>
+                    <input class="basketbt" type="button" value="Remove" v-on:click="remove(item)" />
+                </div>
+            </div>
+            <div class="input-container">
+                <input type="text" id="name" placeholder=" " v-model="checkout.name">
+                <label for="password">Name:</label>
+            </div>
+
+            <div class="input-container">
+                <input type="number" id="phone" placeholder=" " v-model="checkout.phone">
+                <label for="phone">Phone:</label>
+            </div>
+            <div id="feedback">
+                <p></p>
+            </div>
+            <button v-on:click="placeOrder()" type="button" class="checkoutBTN">Place order</button>
+        </div>
+
+
+    </div>
+
+    <script>
+        let app = new Vue({
+            el: '#app',
+            data: {
+                lessons: [],
+                order: {
+                    count: 0,
+                    subjecs: []
+                },
+                checkout: {
+                    name: '',
+                    phone: '',
+                    lessons_id: [],
+                    price: '',
+                    number_of_space: 0
+                }
+            },
+            methods: {
+                toBasket: function (subjec) {
+                    //add subject to basker array
+                    this.order.subjecs.push(subjec);
+                    this.order.count += 1;
+
+                    setTimeout(() => {
+                        window.scrollBy({
+                            top: 800,
+                            left: 0,
+                            behavior: 'smooth'
+                        });
+                    }, 50);
+
+                },
+                remove: function (subjec) {
+                    //for every element in order
+                    for (var i = 0; i < this.order.subjecs.length; i++) {
+                        //check for first id to remove
+                        if (this.order.subjecs[i] == subjec) {
+                            //remove subject/count add spaces and return to not remove all the same objects
+                            this.order.subjecs.splice(i, 1);
+                            this.order.count -= 1;
+                            return
+                        }
+                    }
+                },
+                placeOrder: function () {
+                    //check phone and name regex
+                    const regexName = new RegExp("(?=.*[a-zA-z])");
+                    const regexPhone = new RegExp("(?=.*[0-9])(?=.{8,})");
+                    let feedback = document.getElementById('feedback');
+                    feedback.innerHTML = "";
+                    if (!regexPhone.test(this.checkout.phone) || !regexName.test(this.checkout.name)) {
+                        feedback.innerHTML +=
+                            "<b>Wrong phone number or Wrong name</b><br> (Phone minimum length is 8, and its only numbers. Name should be only letters)";
+                    } else {
+                        
+                        this.order.subjecs.forEach(order => {
+                            this.checkout.lessons_id.push(order._id)
+                        });
+                        this.checkout.price=this.totalPrice;
+                        this.checkout.number_of_space=this.order.count
+                        console.log(this.checkout);
+                        fetch("http://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/collections/orders", {
+                            method: "POST", //set the HTTP method as "POST"
+                            headers: {
+                                "Content-Type": "application/json", //set the data type as JSON
+                            },
+                            body: JSON.stringify(this.checkout) //need to stringigy the JSON
+                        }).then(
+                            function (response) {
+                                response.json().then(
+                                    function (json) {
+                                        alert("Success: " + json.acknowledged);
+
+                                        if(json.acknowledged){
+                                            for(let i=0; i < app.checkout.number_of_space; i++ ){
+                                                app.updateSpaces(app.checkout.lessons_id[i]);
+                                            }
+                                            window.location.reload();
+                                            console.log("Order placed: " + json.acknowledged
+                                            
+                                            );
+                                        }
+                                    }
+                                )
+                            }
+                        );
+                    }
+                },
+                updateSpaces: function (id) {
+                    fetch("http://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/collections/products/"+id, {
+                            method: "PUT", //set the HTTP method as "PUT"
+                            headers: {
+                                "Content-Type": "application/json", //set the data type as JSON
+                            },
+                            body: JSON.stringify(this.checkout) //need to stringigy the JSON
+                        }).then(
+                            function (response) {
+                                response.json().then(
+                                    function (json) {
+                                        console.log("Uptaing number of spaces: " + json.msg);
+                                        
+                                    }
+                                )
+                            }
+                        );
+                },
+            },
+            computed: {
+                totalPrice: function () {
+                    //calculate total price
+                    let total = 0;
+                    this.order.subjecs.forEach(subj => {
+                        total = total + subj.price;
+                    });
+                    return total;
+                },
+            },
+            created: function () {
+                fetch("http://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/lessons/products").then(
+                    function (response) {
+                        response.json().then(function (json) {
+                            app.lessons = json;
+                        })
+                    }
+                )
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+.lesson-boxes {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+}
+
+.lesson-box {
+    height: 45px;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: center;
+    border: 2px solid lightblue;
+    margin: 20px;
+    padding: 20px;
+}
+.cont {
+    width: 280px;
+    height: 220px;
+    border-radius: 30px;
+    background-color: #fefae0;
+    padding: 20px;
+    float: left;
+    margin: 10px;
+  }
+  .cont-mini {
+    width: 157px;
+    height: 210px;
+    border-radius: 30px;
+    background-color: #fefae0;
+    padding: 10px;
+    float: left;
+    margin: 10px;
+    text-align: center;
+  
+  }
