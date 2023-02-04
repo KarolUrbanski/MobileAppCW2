@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongodb": "^4.13.0",
+    "node.js": "^0.0.1-security",
+    "properties-reader": "^2.2.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "cw2",
+  "version": "1.0.0",
+  "description": "cw2 mobile app",
+  "main": "server.js",
+  "keywords": [
+    "cw2"
+  ],
+  "author": "Karol Milosz...",
+  "license": "ISC"
+}
