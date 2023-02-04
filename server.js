@@ -80,5 +80,7 @@ async function lessons(request, response) {
 }
 
 //Start the app listening on port 8080
-app.listen(8080);
-console.log("Listening on port 8080");
+const port = process.env.PORT || 8080;
+app.listen(port, function() {
+console.log("App started on port: " + port);
+});
