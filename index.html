@@ -12,56 +12,77 @@
 
 <body>
     <div id="app">
+        <span style="cursor:pointer;font-size:302x;float: right;" onclick="openCart()">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Shopping Cart
+        </span>
         <ul class="lesson-boxes">
             <div v-for="lesson in lessons" class="lesson-box">
-                <img id="img" width="200" v-bind:src="'https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/static/'+lesson.topic+'.png'"  />
+                <div class="left">
+                    <img id="img"
+                        v-bind:src="'https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/static/'+lesson.topic+'.png'" />
+                </div>
                 <div class="right">
-                <li>topic: {{ lesson.topic }}</li>
-                <li>location: {{ lesson.location }}</li>
-                <li>price: {{ lesson.price }}</li>
-                <p v-if="lesson.space <= 0">No more spaces!</p>
-                <p v-else-if="lesson.space <= 5">Only {{lesson.space}} spaces!</p>
-                <p v-else=>Spaces: {{lesson.space}}</p>
-                <input class="basketbt" type="button" value="Add to Basket" v-on:click="toBasket(lesson)"
-                    v-if="lesson.space > 0" />
-                <input class="basketbt" type="button" value="Add to Basket" disabled="disabled" v-else />
-            </div>
-        </div>
-        </ul>
-
-        <div id="cart" v-show="order.count>0">
-            <h2> Shopping Cart <i class="fa-solid fa-cart-shopping"></i></h2>
-            <div class="left mini-cont">
-                <p>Items in cart: <b>{{order.count}}</b></p>
-                <p>Total Price: <b>{{totalPrice}}</b></p>
-            </div>
-            <div class="itemsCont">
-                <div v-for="item in order.subjecs" class="cont-mini">
-                    <h3>{{item.name}} </h3>
-                    <p>{{item.location}}</p>
-                    <p>Price: {{item.price}}</p>
-                    <input class="basketbt" type="button" value="Remove" v-on:click="remove(item)" />
+                    <p>topic: <b>{{ lesson.topic }}</b></p>
+                    <p>location: <b>{{ lesson.location }}</b></p>
+                    <p>price: <b>{{ lesson.price }}</b></p>
+                    <p v-if="lesson.space <= 0">No more spaces!</p>
+                    <p v-else-if="lesson.space <= 5">Only<b> {{lesson.space}}</b> spaces!</p>
+                    <p v-else=>Spaces:<b> {{lesson.space}}</b></p>
+                    <input class="basketbt" type="button" value="Add to Basket" v-on:click="toBasket(lesson)"
+                        v-if="lesson.space > 0" />
+                    <input class="basketbt" type="button" value="Add to Basket" disabled="disabled" v-else />
                 </div>
             </div>
-            <div class="input-container">
-                <input type="text" id="name" placeholder=" " v-model="checkout.name">
-                <label for="password">Name:</label>
-            </div>
+        </ul>
 
-            <div class="input-container">
-                <input type="number" id="phone" placeholder=" " v-model="checkout.phone">
-                <label for="phone">Phone:</label>
+        <div id="rightCart" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeCart()">&times;</a>
+            <h2> Shopping Cart </h2>
+            <div id="cart" v-show="order.count>0">
+                <div class="left mini-cont">
+                    <p>Items in cart: <b>{{order.count}}</b></p>
+                    <p>Total Price: <b>{{totalPrice}}</b></p>
+                </div>
+                <div class="itemsCont">
+                    <div v-for="item in order.subjecs" class="cont-mini">
+                        <h3 style="float: left; width: 33%;">{{item.topic}} </h3>
+                        <p style="float: left; width: 33%;">{{item.location}}</p>
+                        <p style="float: right; width: 30%;">Price: {{item.price}}</p>
+                        <input class="basketbt" type="button" value="Remove" v-on:click="remove(item)" />
+                    </div>
+                </div>
+                <div class="form">
+
+                <div class="input-container">
+                    <input type="text" id="name" placeholder=" " v-model="checkout.name">
+                    <label for="name">Name:</label>
+                </div>
+
+                <div class="input-container">
+                    <input type="number" id="phone" placeholder=" " v-model="checkout.phone">
+                    <label for="phone">Phone:</label>
+                </div>
+                <div id="feedback">
+                    <p></p>
+                </div>
+                <button v-on:click="placeOrder()" type="button" class="basketbt">Place order</button>
+                
             </div>
-            <div id="feedback">
-                <p></p>
             </div>
-            <button v-on:click="placeOrder()" type="button" class="checkoutBTN">Place order</button>
         </div>
-
 
     </div>
 
+    <script src="https://kit.fontawesome.com/72d85604c0.js" crossorigin="anonymous"></script>
     <script>
+        function openCart() {
+            document.getElementById("rightCart").style.width = "280px";
+        }
+
+        function closeCart() {
+            document.getElementById("rightCart").style.width = "0";
+        }
         let app = new Vue({
             el: '#app',
             data: {
@@ -83,15 +104,7 @@
                     //add subject to basker array
                     this.order.subjecs.push(subjec);
                     this.order.count += 1;
-
-                    setTimeout(() => {
-                        window.scrollBy({
-                            top: 800,
-                            left: 0,
-                            behavior: 'smooth'
-                        });
-                    }, 50);
-
+                    subjec.space -= 1;
                 },
                 remove: function (subjec) {
                     //for every element in order
@@ -101,6 +114,7 @@
                             //remove subject/count add spaces and return to not remove all the same objects
                             this.order.subjecs.splice(i, 1);
                             this.order.count -= 1;
+                            subjec.space += 1;
                             return
                         }
                     }
@@ -115,12 +129,12 @@
                         feedback.innerHTML +=
                             "<b>Wrong phone number or Wrong name</b><br> (Phone minimum length is 8, and its only numbers. Name should be only letters)";
                     } else {
-                        
+
                         this.order.subjecs.forEach(order => {
                             this.checkout.lessons_id.push(order._id)
                         });
-                        this.checkout.price=this.totalPrice;
-                        this.checkout.number_of_space=this.order.count
+                        this.checkout.price = this.totalPrice;
+                        this.checkout.number_of_space = this.order.count
                         console.log(this.checkout);
                         fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/collections/orders", {
                             method: "POST", //set the HTTP method as "POST"
@@ -132,17 +146,16 @@
                             function (response) {
                                 response.json().then(
                                     function (json) {
-                                        alert("Success: " + json.acknowledged);
 
-                                        if(json.acknowledged){
-                                            for(let i=0; i < app.checkout.number_of_space; i++ ){
+                                        if (json.acknowledged) {
+                                            for (let i = 0; i < app.checkout.number_of_space; i++) {
                                                 app.updateSpaces(app.checkout.lessons_id[i]);
                                             }
-                                            window.location.reload();
                                             console.log("Order placed: " + json.acknowledged
-                                            
                                             );
                                         }
+                                        alert("Order placed: " + json.acknowledged);
+                                        window.location.reload();
                                     }
                                 )
                             }
@@ -150,22 +163,23 @@
                     }
                 },
                 updateSpaces: function (id) {
-                    fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/collections/products/"+id, {
+                    fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/collections/products/" +
+                        id, {
                             method: "PUT", //set the HTTP method as "PUT"
                             headers: {
                                 "Content-Type": "application/json", //set the data type as JSON
                             },
                             body: JSON.stringify(this.checkout) //need to stringigy the JSON
                         }).then(
-                            function (response) {
-                                response.json().then(
-                                    function (json) {
-                                        console.log("Uptaing number of spaces: " + json.msg);
-                                        
-                                    }
-                                )
-                            }
-                        );
+                        function (response) {
+                            response.json().then(
+                                function (json) {
+                                    console.log("Uptaing number of spaces: " + json.msg);
+
+                                }
+                            )
+                        }
+                    );
                 },
             },
             computed: {
@@ -179,10 +193,12 @@
                 },
             },
             created: function () {
-                fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/lessons/products",{
+                fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/lessons/products", {
                     method: 'GET',
-    //  mode: 'no-cors',
-      headers: {"Content-Type": "application/json", }
+                    //  mode: 'no-cors',
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
                 }).then(
                     function (response) {
                         response.json().then(function (json) {
