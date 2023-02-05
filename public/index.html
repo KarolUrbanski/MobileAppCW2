@@ -21,12 +21,13 @@
             After School Club
             <!-- search section -->
             <div class="searchBox">
-              <input class="searchInput" type="text" placeholder="Search" v-model.trim="searchString">
+              <input class="searchInput" type="text" placeholder="Search" v-model.trim="searchString"  @keyup="getLessons">
               <button class="searchButton" href="#">
                 <i class="fa-solid fa-magnifying-glass fa-xl"></i>
               </button>
             </div>
           </h1>
+          <div v-if="lessons">
         <ul class="lesson-boxes">
             <div v-for="lesson in lessons" class="lesson-box">
                 <div class="left">
@@ -46,6 +47,8 @@
                 </div>
             </div>
         </ul>
+    </div>
+    <div v-else>Loading data</div>
 
         <div id="rightCart" class="sidenav">
             <a href="javascript:void(0)" class="closebtn" onclick="closeCart()">&times;</a>
@@ -193,18 +196,7 @@
                         }
                     );
                 },
-            },
-            computed: {
-                totalPrice: function () {
-                    //calculate total price
-                    let total = 0;
-                    this.order.subjecs.forEach(subj => {
-                        total = total + subj.price;
-                    });
-                    return total;
-                },
-            },
-            created: function () {
+                getLessons: function () {
                 if (!this.searchString) {
                 fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/lessons/products", {
                     method: 'GET',
@@ -215,7 +207,9 @@
                 }).then(
                     function (response) {
                         response.json().then(function (json) {
-                            app.lessons = json;
+                            console.log(json);
+                            app.lessons=json;
+                            return json;
                         })
                     }
                 )
@@ -231,13 +225,30 @@
                 }).then(
                     function (response) {
                         response.json().then(function (json) {
-                            app.lessons = json;
+                            app.lessons=json;
+                            return json;
                         })
                     }
                 )
 
                 }
             }
+
+            },
+            computed: {
+                totalPrice: function () {
+                    //calculate total price
+                    let total = 0;
+                    this.order.subjecs.forEach(subj => {
+                        total = total + subj.price;
+                    });
+                    return total;
+                },
+            
+        },
+        created: function(){
+            this.getLessons();
+        }
         });
     </script>
 </body>
