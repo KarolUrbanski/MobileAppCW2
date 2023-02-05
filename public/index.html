@@ -12,10 +12,21 @@
 
 <body>
     <div id="app">
-        <span style="cursor:pointer;font-size:302x;float: right;" onclick="openCart()">
+        
+        <span style="cursor:pointer;font-size:32px;float: right;" onclick="openCart()">
             <i class="fa-solid fa-cart-shopping"></i>
             Shopping Cart
         </span>
+        <h1>
+            After School Club
+            <!-- search section -->
+            <div class="searchBox">
+              <input class="searchInput" type="text" placeholder="Search" v-model.trim="searchString">
+              <button class="searchButton" href="#">
+                <i class="fa-solid fa-magnifying-glass fa-xl"></i>
+              </button>
+            </div>
+          </h1>
         <ul class="lesson-boxes">
             <div v-for="lesson in lessons" class="lesson-box">
                 <div class="left">
@@ -87,6 +98,7 @@
             el: '#app',
             data: {
                 lessons: [],
+                searchString: '',
                 order: {
                     count: 0,
                     subjecs: []
@@ -193,6 +205,7 @@
                 },
             },
             created: function () {
+                if (!this.searchString) {
                 fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/lessons/products", {
                     method: 'GET',
                     //  mode: 'no-cors',
@@ -206,6 +219,24 @@
                         })
                     }
                 )
+                }
+                else{
+                    searchString = this.searchString.toLowerCase();
+            fetch("https://webstoreapp-env.eba-z8zi99ic.us-east-1.elasticbeanstalk.com/lessons/products/"+searchString, {
+                    method: 'GET',
+                    //  mode: 'no-cors',
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                }).then(
+                    function (response) {
+                        response.json().then(function (json) {
+                            app.lessons = json;
+                        })
+                    }
+                )
+
+                }
             }
         });
     </script>

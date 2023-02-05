@@ -74,8 +74,24 @@ app.get("/lessons/:collectionName", (req, res) => {
       res.send(results);
     });
 });
+app.get("/lessons/:collectionName/:search", (req, res) => {
+  const findproduct=req.params.search;
+  console.log(findproduct);
+  req.collection
+    .find({topic:{ $regex:'.*'+findproduct+'.*'}})
+    .toArray(function (err, results) {
+      if (err) {
+        return next(err);
+      }
+      res.set({
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      });
+      res.send(results);
+    });
+});
 app.post("/collections/:collectionName", function (req, res, next) {
-  // TODO: Validate req.body
+
   console.log(req.body);
   req.collection.insertOne(req.body, function (err, results) {
     if (err) {
@@ -85,7 +101,7 @@ app.post("/collections/:collectionName", function (req, res, next) {
   });
 });
 app.put("/collections/:collectionName/:id", function (req, res, next) {
-  // TODO: Validate req.body
+
   console.log(req.params.id);
   req.collection.updateOne(
     { _id: new ObjectId(req.params.id) },
