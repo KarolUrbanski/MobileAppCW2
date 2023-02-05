@@ -1,9 +1,10 @@
 //Import the express, and properties-reader modules
 const express = require("express");
+let fs = require("fs");
+const path = require("path")
 let propertiesReader = require("properties-reader");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 var ObjectId = require('mongodb').ObjectID;
-const path = require("path");
 let propertiesPath = path.resolve(__dirname, "conf/db.properties");
 let properties = propertiesReader(propertiesPath);
 let cors = require("cors")
@@ -33,8 +34,30 @@ app.use(express.json());
 //Status codes defined in external file
 require("./http_status.js");
 
+app.use(function (req, res, next) {
+  console.log("Recive request with method: " + req.method + " and url:" + req.url);
+  next();
+});
+app.use('/static',function (req, res, next) {
+  let filePath = path.join(__dirname, "static", req.url);
+  fs.stat(filePath, function (err, fileInfo) {
+    if (err) {
+      next();
+      return;
+    }
+    if (fileInfo.isFile()) {
+      res.sendFile(filePath);
+    } else {
+      next();
+    }
+
+  })
+});
+
+
 app.param("collectionName", function (req, res, next, collectionName) {
   req.collection = db.collection(collectionName);
+  console.log(collectionName);
   return next();
 });
 app.get("/lessons/:collectionName", (req, res) => {
@@ -47,7 +70,7 @@ app.get("/lessons/:collectionName", (req, res) => {
       res.set({
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
-    });
+      });
       res.send(results);
     });
 });
@@ -66,7 +89,7 @@ app.put("/collections/:collectionName/:id", function (req, res, next) {
   console.log(req.params.id);
   req.collection.updateOne(
     { _id: new ObjectId(req.params.id) },
-    { $inc: {space:-1} },
+    { $inc: { space: -1 } },
     { safe: true, multi: false },
     function (err, result) {
       if (err) {
@@ -80,10 +103,13 @@ app.put("/collections/:collectionName/:id", function (req, res, next) {
   );
 });
 
-
+app.use(function(req,res){
+  res.status(404);
+  res.send("file/site not found");
+});
 //Start the app listening on port 8080
 
 const port = process.env.PORT || 8080;
-app.listen(port, function() {
-console.log("App started on port: " + port);
+app.listen(port, function () {
+  console.log("App started on port: " + port);
 });
